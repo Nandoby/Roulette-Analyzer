@@ -1,0 +1,32 @@
+.number-cell {
+  width: 40px;
+  height: 40px;
+  margin: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: white;
+  font-weight: bold;
+  cursor: default;
+}
+
+.red {
+  background-color: #dc3545;
+}
+
+.black {
+  background-color: #212529;
+}
+
+.green {
+  background-color: #198745;
+}
+
+.alert {
+  transition: all 0.3s ease-in-out;
+}
+
+#resultsDisplay {
+  min-height: 50px;
+}
