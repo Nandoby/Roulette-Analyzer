@@ -1,5 +1,6 @@
 class RouletteAnalyzer {
     constructor() {
+        this.results = [];
         this.redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
         this.numberColors = {};
         this.redNumbers.forEach(num => this.numberColors[num] = 'rouge');
@@ -9,12 +10,17 @@ class RouletteAnalyzer {
             }
         }
         this.numberColors[0] = 'vert';
-        
+        this.baseBet = 1.00;  // Mise de base par défaut
+        this.level1Multipliers = [1, 2, 4, 8];  // Multiplicateurs pour le niveau 1
+        this.level2Multipliers = [5, 7, 9, 12, 16, 22, 29, 39, 52];  // Multiplicateurs pour le niveau 2
         this.resetBetting();
     }
 
+    setBaseBet(amount) {
+        this.baseBet = Number(amount);
+    }
+
     resetBetting() {
-        this.results = [];
         this.allResults = []; // Nouveau tableau pour tous les résultats, y compris les 0
         this.redCount = 0;
         this.blackCount = 0;
@@ -23,8 +29,6 @@ class RouletteAnalyzer {
         this.currentBetColor = null;
         this.paroli = false;
         this.paroliBet = 0;
-        this.level1Multipliers = [1, 2, 4, 8];
-        this.level2Multipliers = [5, 7, 9, 12, 16, 22, 29, 39, 52];
         this.maxResults = 24; // On double la taille pour compenser les 0 potentiels
         this.isTracking = false;
     }
@@ -81,7 +85,6 @@ class RouletteAnalyzer {
 
     handleWin() {
         if (this.currentLevel === 1) {
-            // En niveau 1, on recommence au début après une victoire
             this.betIndex = 0;
             this.isTracking = false;
             if (this.results.length > 12) {
@@ -89,11 +92,10 @@ class RouletteAnalyzer {
             }
         } else if (this.currentLevel === 2) {
             if (!this.paroli) {
-                // Premier gain du paroli
                 this.paroli = true;
-                this.paroliBet = this.level2Multipliers[this.betIndex] * 2;  // Double la mise pour le prochain coup
+                let currentBet = this.level2Multipliers[this.betIndex] * this.baseBet;
+                this.paroliBet = currentBet * 2;  // Double la mise pour le prochain coup
             } else {
-                // Deuxième gain du paroli - on garde exactement les 12 derniers résultats
                 const lastResults = this.results.slice(-12);
                 this.resetBetting();
                 this.results = lastResults;
@@ -135,14 +137,27 @@ class RouletteAnalyzer {
 
     getCurrentBet() {
         if (this.currentLevel === 1) {
-            return this.level1Multipliers[this.betIndex];
+            return this.level1Multipliers[this.betIndex] * this.baseBet;
         } else {
             if (this.paroli) {
-                return this.paroliBet;
+                return this.paroliBet;  // Le paroliBet est déjà calculé avec la mise de base
+            }
+            return this.level2Multipliers[this.betIndex] * this.baseBet;
+        }
+    }
+
+    calculateBet() {
+        let amount;
+        if (this.currentLevel === 1) {
+            amount = this.level1Multipliers[this.betIndex] * this.baseBet;
+        } else {
+            if (this.paroli) {
+                amount = this.paroliBet;
             } else {
-                return this.level2Multipliers[this.betIndex];
+                amount = this.level2Multipliers[this.betIndex] * this.baseBet;
             }
         }
+        return Number(amount).toFixed(2);
     }
 
     analyze() {
@@ -151,7 +166,6 @@ class RouletteAnalyzer {
         let tempResults = [...this.results];
         let index = tempResults.length - 1;
         
-        // On collecte les 12 derniers résultats non-verts pour le comptage
         while (index >= 0 && nonGreenResults.length < 12) {
             if (this.numberColors[tempResults[index]] !== 'vert') {
                 nonGreenResults.unshift(tempResults[index]);
@@ -163,19 +177,13 @@ class RouletteAnalyzer {
         let redCount = colors.filter(color => color === 'rouge').length;
         let blackCount = colors.filter(color => color === 'noir').length;
 
-        // Pour le total, on prend soit tous les résultats non-verts si on est en tracking,
-        // soit juste les 12 derniers si on n'est pas en tracking
-        const totalResults = this.isTracking ? 
-            tempResults.filter(num => this.numberColors[num] !== 'vert') :
-            nonGreenResults;
-
+        // Détection initiale (6 rouges et 6 noirs)
+        const patternDetected = !this.isTracking && (redCount === blackCount && redCount === 6);
+        
         let recommendation = null;
         let betColor = null;
         let betAmount = 0;
 
-        // Détection initiale (6 rouges et 6 noirs)
-        const patternDetected = !this.isTracking && (redCount === blackCount && redCount === 6);
-        
         if (patternDetected) {
             this.lastDetection = true;
             this.isTracking = true;
@@ -209,7 +217,7 @@ class RouletteAnalyzer {
                     levelInfo += " (Paroli)";
                 }
                 
-                recommendation = `${levelInfo} - Misez ${betAmount} pièce${betAmount > 1 ? 's' : ''} sur ${betColor}`;
+                recommendation = `${levelInfo} - Misez ${betAmount.toFixed(2)} € sur ${betColor}`;
             } else {
                 recommendation = "Égalité atteinte. Attendez un nouveau déséquilibre.";
             }
@@ -225,7 +233,7 @@ class RouletteAnalyzer {
             patternDetected,
             redCount,
             blackCount,
-            total: totalResults.length,
+            total: nonGreenResults.length,
             recommendation,
             betColor,
             message: this.generateMessage(patternDetected, redCount, blackCount, recommendation),
@@ -237,7 +245,7 @@ class RouletteAnalyzer {
     }
 
     generateMessage(patternDetected, redCount, blackCount, recommendation) {
-        if (patternDetected) {
+        if (patternDetected && !this.isTracking) {
             return "Pattern détecté! 6 rouges et 6 noirs - Système activé!";
         } else if (recommendation) {
             return `${redCount} rouges et ${blackCount} noirs - ${recommendation}`;

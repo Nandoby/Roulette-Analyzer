@@ -47,9 +47,9 @@
         </div>
 
         <!-- Message d'alerte et recommandation -->
-        <div id="alertArea" class="row justify-content-center mb-4" style="display: none;">
+        <div id="alertArea" style="display: none;">
             <div class="col-md-8">
-                <div class="alert alert-info" role="alert" id="alertMessage"></div>
+                <div id="alertMessage" role="alert"></div>
             </div>
         </div>
 
@@ -106,7 +106,7 @@
                     alert('La mise de base doit être supérieure à 0');
                     return;
                 }
-                analyzer.setBaseUnit(amount);
+                analyzer.setBaseBet(amount);
                 // Mettre à jour l'affichage avec les nouvelles valeurs
                 const results = analyzer.getCurrentResults();
                 const analysis = analyzer.analyze();
@@ -121,7 +121,7 @@
                 // Mise à jour de l'affichage des résultats
                 resultsDisplay.innerHTML = '';
                 // Afficher les résultats dans l'ordre inverse (dernier à gauche)
-                [...results].reverse().forEach(result => {
+                results.reverse().forEach(result => {
                     const cell = document.createElement('div');
                     cell.className = `number-cell ${result.color}`;
                     cell.textContent = result.number;
@@ -144,8 +144,6 @@
                     );
                 }
                 
-                alertMessage.textContent = analysis.message;
-                
                 // Changement de style selon le type de message
                 if (analysis.patternDetected) {
                     alertMessage.className = 'alert alert-success';
@@ -154,6 +152,8 @@
                 } else {
                     alertMessage.className = 'alert alert-info';
                 }
+                
+                alertMessage.textContent = analysis.message;
             }
 
             function addNumber() {
