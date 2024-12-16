@@ -29,8 +29,15 @@ class RouletteAnalyzer {
         this.currentBetColor = null;
         this.paroli = false;
         this.paroliBet = 0;
-        this.maxResults = 24; // On double la taille pour compenser les 0 potentiels
+        this.baseMaxResults = 12; // Nombre de base de résultats hors 0
         this.isTracking = false;
+    }
+
+    getAdjustedMaxResults() {
+        // Compte le nombre de 0 dans les derniers résultats
+        const zeroCount = this.results.filter(num => num === 0).length;
+        // Ajuste le maxResults en fonction du nombre de 0
+        return this.baseMaxResults + zeroCount;
     }
 
     addResult(number) {
@@ -38,29 +45,26 @@ class RouletteAnalyzer {
             throw new Error('Le numéro doit être entre 0 et 36');
         }
 
-        // Ajouter le numéro aux résultats
-        this.results.push(number);
+        // Ajouter le numéro aux résultats pour l'affichage
         this.allResults.push(number);
+        this.results.push(number);
 
-        // Si on dépasse maxResults, on retire les plus anciens
-        if (this.results.length > this.maxResults) {
-            this.results = this.results.slice(-this.maxResults);
+        // Si on n'a pas encore détecté le pattern 6-6
+        if (!this.isTracking) {
+            // Limiter à maxResults ajusté seulement avant la détection du pattern
+            const adjustedMax = this.getAdjustedMaxResults();
+            if (this.results.length > adjustedMax) {
+                this.results = this.results.slice(-adjustedMax);
+            }
         }
 
-        // Si c'est un 0 et qu'on avait un pari en cours, on passe à la mise suivante
-        if (number === 0 && this.currentBetColor) {
-            this.handleLoss();
-            return this.analyze();
-        }
-
-        // Si on avait un pari en cours, vérifions le résultat
+        // Si on avait un pari en cours
         if (this.currentBetColor) {
-            const resultColor = this.numberColors[number];
-            
-            // Si c'est un 0, on passe à la mise suivante
-            if (resultColor === 'vert') {
+            if (number === 0) {
+                // Le 0 compte comme une perte
                 this.handleLoss();
             } else {
+                const resultColor = this.numberColors[number];
                 const won = (this.currentBetColor === 'rouge' && resultColor === 'rouge') ||
                            (this.currentBetColor === 'noir' && resultColor === 'noir');
                 
@@ -73,32 +77,69 @@ class RouletteAnalyzer {
             this.currentBetColor = null;
         }
 
-        // Gestion des résultats non-tracking
-        if (!this.isTracking) {
-            if (this.results.length > this.maxResults) {
-                this.results = this.results.slice(-this.maxResults);
-            }
-        }
-
         return this.analyze();
     }
 
     handleWin() {
         if (this.currentLevel === 1) {
+            // Victoire au niveau 1 : on réinitialise
             this.betIndex = 0;
             this.isTracking = false;
-            if (this.results.length > 12) {
-                this.results = this.results.slice(-12);
+            // On prend les 12 derniers numéros non-verts et les 0 entre eux
+            const nonGreenResults = [];
+            let index = this.results.length - 1;
+            let countNonGreen = 0;
+            let lastNonGreenIndex = -1;
+            
+            // D'abord, trouvons l'index du 12ème numéro non-vert
+            while (index >= 0 && countNonGreen < 12) {
+                if (this.results[index] !== 0) {
+                    countNonGreen++;
+                    if (countNonGreen === 12) {
+                        lastNonGreenIndex = index;
+                    }
+                }
+                index--;
+            }
+
+            // Si on a trouvé 12 numéros non-verts, prenons tous les numéros depuis cet index
+            if (lastNonGreenIndex !== -1) {
+                this.results = this.results.slice(lastNonGreenIndex);
             }
         } else if (this.currentLevel === 2) {
             if (!this.paroli) {
+                // Premier gain au niveau 2 : on active le Paroli (on continue)
                 this.paroli = true;
                 let currentBet = this.level2Multipliers[this.betIndex] * this.baseBet;
                 this.paroliBet = currentBet * 2;  // Double la mise pour le prochain coup
             } else {
-                const lastResults = this.results.slice(-12);
-                this.resetBetting();
-                this.results = lastResults;
+                // Victoire avec le Paroli doublé : on réinitialise tout
+                // On prend les 12 derniers numéros non-verts et les 0 entre eux
+                const nonGreenResults = [];
+                let index = this.results.length - 1;
+                let countNonGreen = 0;
+                let lastNonGreenIndex = -1;
+                
+                // D'abord, trouvons l'index du 12ème numéro non-vert
+                while (index >= 0 && countNonGreen < 12) {
+                    if (this.numberColors[this.results[index]] === 'vert') {
+                        nonGreenResults.unshift(this.results[index]);
+                    } else {
+                        nonGreenResults.unshift(this.results[index]);
+                        countNonGreen++;
+                        if (countNonGreen === 12) {
+                            lastNonGreenIndex = index;
+                        }
+                    }
+                    index--;
+                }
+
+                // Si on a trouvé 12 numéros non-verts, prenons tous les numéros depuis cet index
+                if (lastNonGreenIndex !== -1) {
+                    const lastResults = this.results.slice(lastNonGreenIndex);
+                    this.resetBetting();
+                    this.results = lastResults;
+                }
             }
         }
     }
@@ -161,14 +202,18 @@ class RouletteAnalyzer {
     }
 
     analyze() {
-        // On prend plus que 12 résultats pour compenser les 0 potentiels
         let nonGreenResults = [];
         let tempResults = [...this.results];
         let index = tempResults.length - 1;
         
-        while (index >= 0 && nonGreenResults.length < 12) {
-            if (this.numberColors[tempResults[index]] !== 'vert') {
+        // On prend les 12 derniers résultats non-verts, plus les 0 qui sont entre eux
+        let countNonGreen = 0;
+        while (index >= 0 && countNonGreen < 12) {
+            if (this.numberColors[tempResults[index]] === 'vert') {
                 nonGreenResults.unshift(tempResults[index]);
+            } else {
+                nonGreenResults.unshift(tempResults[index]);
+                countNonGreen++;
             }
             index--;
         }
@@ -184,12 +229,12 @@ class RouletteAnalyzer {
         let betColor = null;
         let betAmount = 0;
 
+        // Après une détection, on suit la stratégie
         if (patternDetected) {
             this.lastDetection = true;
             this.isTracking = true;
             recommendation = "Pattern détecté! Commencez à suivre les résultats.";
         } 
-        // Après une détection, on suit la stratégie
         else if (this.isTracking) {
             // On prend les résultats après la détection du pattern
             let postDetectionResults = [];
@@ -246,7 +291,7 @@ class RouletteAnalyzer {
 
     generateMessage(patternDetected, redCount, blackCount, recommendation) {
         if (patternDetected && !this.isTracking) {
-            return "Pattern détecté! 6 rouges et 6 noirs - Système activé!";
+            return `Pattern détecté! 6 rouges et 6 noirs - Système activé!`;
         } else if (recommendation) {
             return `${redCount} rouges et ${blackCount} noirs - ${recommendation}`;
         } else if (this.isTracking) {
@@ -263,8 +308,12 @@ class RouletteAnalyzer {
         this.isTracking = false;
         this.currentBetColor = null;
         this.currentLevel = 1;
-        this.betIndex = 0;
         this.paroli = false;
-        this.paroliBet = 0;
+        this.consecutiveLosses = 0;
     }
+}
+
+// Export for Node.js testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = RouletteAnalyzer;
 }
