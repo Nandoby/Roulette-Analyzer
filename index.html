@@ -1,386 +1,424 @@
 <!DOCTYPE html>
 <html lang="fr" data-bs-theme="light">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analyseur de Roulette</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <script
-      src="https://kit.fontawesome.com/78c72d8c86.js"
-      crossorigin="anonymous"
-    ></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/78c72d8c86.js" crossorigin="anonymous"></script>
     <style>
-      :root {
-        --message-bg-light: rgba(255, 255, 255, 0.95);
-        --message-bg-dark: rgba(33, 37, 41, 0.95);
-      }
+        :root {
+            --message-bg-light: rgba(255, 255, 255, 0.95);
+            --message-bg-dark: rgba(33, 37, 41, 0.95);
+        }
+        
+        [data-bs-theme="dark"] {
+            --message-bg: var(--message-bg-dark);
+        }
 
-      [data-bs-theme="dark"] {
-        --message-bg: var(--message-bg-dark);
-      }
+        [data-bs-theme="light"] {
+            --message-bg: var(--message-bg-light);
+        }
 
-      [data-bs-theme="light"] {
-        --message-bg: var(--message-bg-light);
-      }
-
-      body {
-        padding: 20px;
-        transition: background-color 0.3s ease;
-      }
-
-      .container {
-        max-width: 800px;
-      }
-
-      #resultsDisplay {
-        font-size: 1.5em;
-        margin-bottom: 20px;
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-        gap: 5px;
-        padding: 10px;
-      }
-
-      .message-container {
-        text-align: center;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 8px;
-        background: var(--message-bg);
-        font-size: 1.2em;
-      }
-
-      .number-cell {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        aspect-ratio: 1;
-        width: 100%;
-        min-width: 30px;
-        max-width: 35px;
-        margin: 0;
-        font-size: 0.7em;
-        border-radius: 50%;
-        color: white;
-      }
-
-      /* Styles pour les numéros dans resultsDisplay */
-      .number-cell.rouge {
-        background-color: #dc3545;
-      }
-      .number-cell.noir {
-        background-color: #212529;
-      }
-      .number-cell.vert {
-        background-color: #198754;
-      }
-
-      /* Styles pour le texte dans le message */
-      #alertMessage .rouge {
-        color: #dc3545;
-        font-weight: bold;
-      }
-
-      #alertMessage .noir {
-        color: #212529;
-        font-weight: bold;
-      }
-
-      [data-bs-theme="dark"] #alertMessage .noir {
-        color: #f8f9fa;
-      }
-
-      .bet-color {
-        font-weight: bold;
-        font-size: 1.2em;
-        margin: 0 4px;
-        display: inline-block;
-      }
-
-      .bet-color.rouge {
-        color: #dc3545;
-      }
-
-      .bet-color.noir {
-        color: #212529;
-      }
-
-      [data-bs-theme="dark"] .bet-color.noir {
-        color: #f8f9fa;
-      }
-
-      .bet-amount {
-        font-weight: bold;
-        padding: 2px 8px;
-        border-radius: 4px;
-        background-color: #f8f9fa;
-        border: 1px solid #dee2e6;
-      }
-
-      /* Ajout d'un bouton de thème */
-      .theme-switch {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-      }
-
-      /* Media queries pour différentes tailles d'écran */
-      @media (max-width: 576px) {
-        #resultsDisplay {
-          font-size: 1.2em;
-          grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+        body {
+            padding: 20px;
+            transition: background-color 0.3s ease;
         }
 
         .container {
-          padding: 10px;
+            max-width: 800px;
         }
 
-        .number-cell {
-            font-size: 0.8em;
-        }
-      }
-
-      @media (min-width: 992px) {
         #resultsDisplay {
-            grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .message-container {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            background: var(--message-bg);
+            font-size: 1.2em;
         }
 
         .number-cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1;
+            width: 100%;
+            min-width: 30px;
             max-width: 35px;
-            font-size: 0.6em;
+            margin: 0;
+            font-size: 0.7em;
+            border-radius: 50%;
+            color: white;
         }
-      }
+
+        /* Styles pour les numéros dans resultsDisplay */
+        .number-cell.rouge { 
+            background-color: #DC3545; 
+        }
+        .number-cell.noir { 
+            background-color: #212529; 
+        }
+        .number-cell.vert { 
+            background-color: #198754; 
+        }
+
+        /* Styles pour le texte dans le message */
+        #alertMessage .rouge {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        #alertMessage .noir {
+            color: #212529;
+            font-weight: bold;
+        }
+
+        [data-bs-theme="dark"] #alertMessage .noir {
+            color: #f8f9fa;
+        }
+
+        .bet-color {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin: 0 4px;
+            display: inline-block;
+        }
+
+        .bet-color.rouge {
+            color: #dc3545;
+        }
+
+        .bet-color.noir {
+            color: #212529;
+        }
+
+        [data-bs-theme="dark"] .bet-color.noir {
+            color: #f8f9fa;
+        }
+
+        .bet-amount {
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Ajout d'un bouton de thème */
+        .theme-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+
+        /* Style pour la barre de navigation */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: var(--message-bg);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Ajustement du contenu principal pour la navbar fixe */
+        .main-content {
+            margin-top: 70px;
+        }
+
+        /* Style pour les boutons de la navbar */
+        .navbar .btn {
+            margin: 0 5px;
+            padding: 0.375rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar .btn i {
+            font-size: 1.1em;
+        }
+
+        /* Media queries pour différentes tailles d'écran */
+        @media (max-width: 576px) {
+            #resultsDisplay {
+                font-size: 1.2em;
+                grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+            }
+            
+            .container {
+                padding: 10px;
+            }
+
+            .number-cell {
+                font-size: 0.8em;
+            }
+        }
+
+        @media (min-width: 992px) {
+            #resultsDisplay {
+                grid-template-columns: repeat(auto-fill, minmax(35px, 1fr));
+            }
+            
+            .number-cell {
+                max-width: 35px;
+                font-size: 0.6em;
+            }
+        }
     </style>
-  </head>
-  <body>
-    <!-- Bouton de thème -->
-    <button
-      class="btn btn-outline-primary theme-switch"
-      onclick="toggleTheme()"
-    >
-      <i class="fas fa-moon"></i> Changer de thème
-    </button>
+</head>
+<body>
+    <nav class="navbar">
+      <div class="container-fluid">
+        <span class="navbar-brand">Roulette Analyzer</span>
+        <div class="d-flex">
+          <button class="btn btn-outline-primary" id="navResetButton">
+            <i class="fas fa-redo-alt"></i>
+            <span class="d-none d-sm-inline">Réinitialiser</span>
+          </button>
+          <button class="btn btn-outline-primary" onclick="toggleTheme()">
+            <i class="fas fa-moon"></i>
+            <span class="d-none d-sm-inline">Thème</span>
+          </button>
+          <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#helpModal">
+            <i class="fas fa-question-circle"></i>
+            <span class="d-none d-sm-inline">Aide</span>
+          </button>
+        </div>
+      </div>
+    </nav>
 
-    <div class="container mt-5">
-      <h1 class="text-center mb-4">Analyseur de Roulette</h1>
-
-      <!-- Configuration de la mise de base -->
-      <div class="row justify-content-center mb-4">
-        <div class="col-md-6">
-          <div class="input-group">
-            <span class="input-group-text">Mise de base (€)</span>
-            <input
-              type="number"
-              id="baseUnitInput"
-              class="form-control"
-              min="0.01"
-              step="0.01"
-              value="1.00"
-            />
-            <button class="btn btn-success" id="setBaseUnitButton">
-              Définir
-            </button>
+    <!-- Modal d'aide -->
+    <div class="modal fade" id="helpModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Aide</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
-        </div>
-      </div>
-
-      <!-- Formulaire d'entrée -->
-      <div class="row justify-content-center mb-4">
-        <div class="col-md-6">
-          <div class="input-group">
-            <input
-              type="number"
-              id="numberInput"
-              class="form-control"
-              min="0"
-              max="36"
-              placeholder="Entrez un numéro (0-36)"
-            />
-            <button class="btn btn-primary" id="addButton">Ajouter</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Affichage des résultats -->
-      <div class="row justify-content-center mb-4">
-        <div class="col-md-8">
-          <h4 class="text-center mb-3">Derniers résultats</h4>
-          <div id="resultsDisplay" class="text-center"></div>
-        </div>
-      </div>
-
-      <!-- Statistiques -->
-      <div class="row justify-content-center mb-4">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Statistiques actuelles</h5>
-              <div class="row">
-                <div class="col">
-                  <p class="mb-1">Rouges: <span id="redCount">0</span></p>
-                  <p class="mb-1">Noirs: <span id="blackCount">0</span></p>
-                  <p class="mb-1">
-                    Total (hors 0): <span id="totalCount">0</span>
-                  </p>
-                </div>
-                <div class="col text-end">
-                  <button id="resetButton" class="btn btn-secondary">
-                    Réinitialiser
-                  </button>
-                </div>
-              </div>
-            </div>
+          <div class="modal-body">
+            <h6>Comment utiliser l'application :</h6>
+            <ol>
+              <li>Entrez les numéros de la roulette (0-36)</li>
+              <li>L'application détecte automatiquement les patterns</li>
+              <li>Suivez les recommandations de mise affichées</li>
+            </ol>
+            <h6>Système de mise :</h6>
+            <ul>
+              <li>Niveau 1 : Progression 0.10€ → 0.80€</li>
+              <li>Niveau 2 : Paroli commençant à 0.50€</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
 
+    <div class="container mt-5 main-content">
+        <h1 class="text-center mb-4">Analyseur de Roulette</h1>
+        
+        <!-- Configuration de la mise de base -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text">Mise de base (€)</span>
+                    <input type="number" id="baseUnitInput" class="form-control" min="0.01" step="0.01" value="1.00">
+                    <button class="btn btn-success" id="setBaseUnitButton">Définir</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire d'entrée -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="number" id="numberInput" class="form-control" min="0" max="36" placeholder="Entrez un numéro (0-36)">
+                    <button class="btn btn-primary" id="addButton">Ajouter</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Affichage des résultats -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <h4 class="text-center mb-3">Derniers résultats</h4>
+                <div id="resultsDisplay" class="text-center"></div>
+            </div>
+        </div>
+
+        <!-- Statistiques -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statistiques actuelles</h5>
+                        <div class="row">
+                            <div class="col">
+                                <p class="mb-1">Rouges: <span id="redCount">0</span></p>
+                                <p class="mb-1">Noirs: <span id="blackCount">0</span></p>
+                                <p class="mb-1">Total (hors 0): <span id="totalCount">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Message flottant -->
-    <div id="alertArea" class="message-container" style="display: none">
-      <div id="alertMessage" class="text-center" role="alert"></div>
+    <div id="alertArea" class="message-container" style="display: none;">
+        <div id="alertMessage" class="text-center" role="alert"></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="roulette.js"></script>
     <script>
-      // Fonction pour basculer le thème
-      function toggleTheme() {
-        const html = document.documentElement;
-        const currentTheme = html.getAttribute("data-bs-theme");
-        const newTheme = currentTheme === "dark" ? "light" : "dark";
-        html.setAttribute("data-bs-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-      }
-
-      // Restaurer le thème au chargement
-      document.addEventListener("DOMContentLoaded", () => {
-        const savedTheme = localStorage.getItem("theme") || "light";
-        document.documentElement.setAttribute("data-bs-theme", savedTheme);
-
-        const analyzer = new RouletteAnalyzer();
-        const numberInput = document.getElementById("numberInput");
-        const addButton = document.getElementById("addButton");
-        const resetButton = document.getElementById("resetButton");
-        const alertArea = document.getElementById("alertArea");
-        const alertMessage = document.getElementById("alertMessage");
-        const resultsDisplay = document.getElementById("resultsDisplay");
-        const redCount = document.getElementById("redCount");
-        const blackCount = document.getElementById("blackCount");
-        const totalCount = document.getElementById("totalCount");
-        const baseUnitInput = document.getElementById("baseUnitInput");
-        const setBaseUnitButton = document.getElementById("setBaseUnitButton");
-
-        // Gestionnaire pour le changement de mise de base
-        setBaseUnitButton.addEventListener("click", () => {
-          const amount = parseFloat(baseUnitInput.value);
-          if (amount <= 0) {
-            alert("La mise de base doit être supérieure à 0");
-            return;
-          }
-          analyzer.setBaseBet(amount);
-          // Mettre à jour l'affichage avec les nouvelles valeurs
-          const results = analyzer.getCurrentResults();
-          const analysis = analyzer.analyze();
-          updateDisplay(results, analysis);
-        });
-
-        function formatBet(amount) {
-          return amount.toFixed(2) + " €";
+        // Fonction pour basculer le thème
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-bs-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-bs-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
         }
 
-        function updateDisplay(results, analysis) {
-          // Mise à jour de l'affichage des résultats
-          resultsDisplay.innerHTML = "";
-          // Afficher les résultats dans l'ordre inverse (dernier à gauche)
-          results.reverse().forEach((result) => {
-            const cell = document.createElement("div");
-            cell.className = `number-cell ${result.color}`;
-            cell.textContent = result.number;
-            resultsDisplay.appendChild(cell);
-          });
+        // Restaurer le thème au chargement
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-bs-theme', savedTheme);
 
-          // Mise à jour des statistiques
-          redCount.textContent = analysis.redCount;
-          blackCount.textContent = analysis.blackCount;
-          totalCount.textContent = resultsDisplay.children.length; // Compte simplement le nombre de cellules
+            const analyzer = new RouletteAnalyzer();
+            const numberInput = document.getElementById('numberInput');
+            const addButton = document.getElementById('addButton');
+            const resetButton = document.getElementById('resetButton');
+            const navResetButton = document.getElementById('navResetButton');
+            const alertArea = document.getElementById('alertArea');
+            const alertMessage = document.getElementById('alertMessage');
+            const resultsDisplay = document.getElementById('resultsDisplay');
+            const redCount = document.getElementById('redCount');
+            const blackCount = document.getElementById('blackCount');
+            const totalCount = document.getElementById('totalCount');
+            const baseUnitInput = document.getElementById('baseUnitInput');
+            const setBaseUnitButton = document.getElementById('setBaseUnitButton');
 
-          // Mise à jour de l'alerte et des recommandations
-          alertArea.style.display = "block";
+            // Gestionnaire pour le changement de mise de base
+            setBaseUnitButton.addEventListener('click', () => {
+                const amount = parseFloat(baseUnitInput.value);
+                if (amount <= 0) {
+                    alert('La mise de base doit être supérieure à 0');
+                    return;
+                }
+                analyzer.setBaseBet(amount);
+                // Mettre à jour l'affichage avec les nouvelles valeurs
+                const results = analyzer.getCurrentResults();
+                const analysis = analyzer.analyze();
+                updateDisplay(results, analysis);
+            });
 
-          // Modifier le message pour inclure le montant formaté
-          if (analysis.recommendation && analysis.betAmount > 0) {
-            analysis.message = analysis.message.replace(
-              /Misez (\d+) pièces? sur/,
-              `Misez ${formatBet(analysis.betAmount)} sur`
-            );
-          }
-
-          // Changement de style selon le type de message
-          if (analysis.patternDetected) {
-            alertMessage.className = "alert alert-success";
-          } else if (analysis.recommendation && analysis.betColor) {
-            alertMessage.className = "alert alert-warning";
-          } else {
-            alertMessage.className = "alert alert-info";
-          }
-
-          // Mise en forme du message avec mise en évidence
-          if (analysis.betAmount) {
-            const parts = analysis.message.split(/Misez ([\d.]+) € sur/);
-            if (parts.length === 3) {
-              const coloredWord = parts[2].trim();
-              const color = coloredWord === "rouge" ? "#dc3545" : "#212529";
-              analysis.message = `${parts[0]}Misez <span class="bet-amount">${parts[1]} €</span> sur <span style="color: ${color}; font-weight: bold;">${coloredWord}</span>`;
+            function formatBet(amount) {
+                return amount.toFixed(2) + ' €';
             }
-          }
 
-          alertMessage.innerHTML = analysis.message;
-        }
+            function updateDisplay(results, analysis) {
+                // Mise à jour de l'affichage des résultats
+                resultsDisplay.innerHTML = '';
+                // Afficher les résultats dans l'ordre inverse (dernier à gauche)
+                results.reverse().forEach(result => {
+                    const cell = document.createElement('div');
+                    cell.className = `number-cell ${result.color}`;
+                    cell.textContent = result.number;
+                    resultsDisplay.appendChild(cell);
+                });
 
-        function addNumber() {
-          const number = parseInt(numberInput.value);
-          if (isNaN(number) || number < 0 || number > 36) {
-            alert("Veuillez entrer un numéro valide entre 0 et 36");
-            return;
-          }
+                // Mise à jour des statistiques
+                redCount.textContent = analysis.redCount;
+                blackCount.textContent = analysis.blackCount;
+                totalCount.textContent = resultsDisplay.children.length;  // Compte simplement le nombre de cellules
 
-          try {
-            const analysis = analyzer.addResult(number);
-            const results = analyzer.getCurrentResults();
-            updateDisplay(results, analysis);
-            numberInput.value = "";
-          } catch (error) {
-            alert(error.message);
-          }
-        }
+                // Mise à jour de l'alerte et des recommandations
+                alertArea.style.display = 'block';
+                
+                // Modifier le message pour inclure le montant formaté
+                if (analysis.recommendation && analysis.betAmount > 0) {
+                    analysis.message = analysis.message.replace(
+                        /Misez (\d+) pièces? sur/,
+                        `Misez ${formatBet(analysis.betAmount)} sur`
+                    );
+                }
+                
+                // Changement de style selon le type de message
+                if (analysis.patternDetected) {
+                    alertMessage.className = 'alert alert-success';
+                } else if (analysis.recommendation && analysis.betColor) {
+                    alertMessage.className = 'alert alert-warning';
+                } else {
+                    alertMessage.className = 'alert alert-info';
+                }
+                
+                // Mise en forme du message avec mise en évidence
+                if (analysis.betAmount) {
+                    const parts = analysis.message.split(/Misez ([\d.]+) € sur/);
+                    if (parts.length === 3) {
+                        const coloredWord = parts[2].trim();
+                        const color = coloredWord === 'rouge' ? '#dc3545' : '#212529';
+                        analysis.message = `${parts[0]}Misez <span class="bet-amount">${parts[1]} €</span> sur <span style="color: ${color}; font-weight: bold;">${coloredWord}</span>`;
+                    }
+                }
+                
+                alertMessage.innerHTML = analysis.message;
+            }
 
-        function resetAnalyzer() {
-          if (confirm("Voulez-vous vraiment réinitialiser l'analyseur ?")) {
-            analyzer.clearResults();
-            resultsDisplay.innerHTML = "";
-            alertArea.style.display = "none";
-            redCount.textContent = "0";
-            blackCount.textContent = "0";
-            totalCount.textContent = "0";
-            numberInput.value = "";
-          }
-        }
+            function addNumber() {
+                const number = parseInt(numberInput.value);
+                if (isNaN(number) || number < 0 || number > 36) {
+                    alert('Veuillez entrer un numéro valide entre 0 et 36');
+                    return;
+                }
 
-        // Gestionnaires d'événements
-        addButton.addEventListener("click", addNumber);
-        resetButton.addEventListener("click", resetAnalyzer);
-        numberInput.addEventListener("keypress", (e) => {
-          if (e.key === "Enter") {
-            addNumber();
-          }
+                try {
+                    const analysis = analyzer.addResult(number);
+                    const results = analyzer.getCurrentResults();
+                    updateDisplay(results, analysis);
+                    numberInput.value = '';
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+
+            function resetAnalyzer() {
+                if (confirm('Voulez-vous vraiment réinitialiser l\'analyseur ?')) {
+                    analyzer.clearResults();
+                    resultsDisplay.innerHTML = '';
+                    alertArea.style.display = 'none';
+                    redCount.textContent = '0';
+                    blackCount.textContent = '0';
+                    totalCount.textContent = '0';
+                    numberInput.value = '';
+                }
+            }
+
+            // Gestionnaires d'événements
+            addButton.addEventListener('click', addNumber);
+            navResetButton.addEventListener('click', resetAnalyzer);
+            numberInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addNumber();
+                }
+            });
+
+            // Focus initial sur l'input
+            numberInput.focus();
         });
-
-        // Focus initial sur l'input
-        numberInput.focus();
-      });
     </script>
-  </body>
+</body>
 </html>
