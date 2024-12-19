@@ -45,6 +45,7 @@
             border-radius: 8px;
             background: var(--message-bg);
             font-size: 1.2em;
+            transition: opacity 0.3s ease-in-out;
         }
 
         .number-cell {
@@ -59,6 +60,7 @@
             font-size: 0.7em;
             border-radius: 50%;
             color: white;
+            animation: fadeIn 0.3s ease-in-out;
         }
 
         /* Styles pour les numéros dans resultsDisplay */
@@ -150,6 +152,16 @@
             font-size: 1.1em;
         }
 
+        /* Transitions pour les boutons */
+        .btn {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
         /* Media queries pour différentes tailles d'écran */
         @media (max-width: 576px) {
             #resultsDisplay {
@@ -174,6 +186,18 @@
             .number-cell {
                 max-width: 35px;
                 font-size: 0.6em;
+            }
+        }
+
+        /* Keyframes pour le fade-in */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
             }
         }
     </style>
@@ -243,7 +267,9 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <input type="number" id="numberInput" class="form-control" min="0" max="36" placeholder="Entrez un numéro (0-36)">
-                    <button class="btn btn-primary" id="addButton">Ajouter</button>
+                    <button class="btn btn-primary" id="addButton" disabled>
+                        Ajouter
+                    </button>
                 </div>
             </div>
         </div>
@@ -300,7 +326,6 @@
             const analyzer = new RouletteAnalyzer();
             const numberInput = document.getElementById('numberInput');
             const addButton = document.getElementById('addButton');
-            const resetButton = document.getElementById('resetButton');
             const navResetButton = document.getElementById('navResetButton');
             const alertArea = document.getElementById('alertArea');
             const alertMessage = document.getElementById('alertMessage');
@@ -310,6 +335,21 @@
             const totalCount = document.getElementById('totalCount');
             const baseUnitInput = document.getElementById('baseUnitInput');
             const setBaseUnitButton = document.getElementById('setBaseUnitButton');
+
+            // Validation en temps réel du champ de saisie
+            numberInput.addEventListener('input', function() {
+                const value = this.value;
+                const number = parseInt(value);
+                
+                if (value === '' || isNaN(number) || number < 0 || number > 36) {
+                    addButton.disabled = true;
+                } else {
+                    addButton.disabled = false;
+                }
+            });
+
+            // Initialiser le bouton comme désactivé
+            addButton.disabled = true;
 
             // Gestionnaire pour le changement de mise de base
             setBaseUnitButton.addEventListener('click', () => {
