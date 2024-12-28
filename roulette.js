@@ -31,6 +31,7 @@ class RouletteAnalyzer {
         this.paroliBet = 0;
         this.baseMaxResults = 12; // Nombre de base de résultats hors 0
         this.isTracking = false;
+        this.previousState = null;
     }
 
     getAdjustedMaxResults() {
@@ -44,6 +45,16 @@ class RouletteAnalyzer {
         if (number < 0 || number > 36) {
             throw new Error('Le numéro doit être entre 0 et 36');
         }
+
+        // Sauvegarder l'état avant d'ajouter le numéro
+        this.previousState = {
+            isTracking: this.isTracking,
+            currentLevel: this.currentLevel,
+            betIndex: this.betIndex,
+            paroli: this.paroli,
+            currentBetColor: this.currentBetColor,
+            paroliBet: this.paroliBet
+        };
 
         // Ajouter le numéro aux résultats pour l'affichage
         this.allResults.push(number);
@@ -302,14 +313,46 @@ class RouletteAnalyzer {
     }
 
     clearResults() {
-        this.results = [];
         this.allResults = [];
-        this.lastDetection = false;
-        this.isTracking = false;
-        this.currentBetColor = null;
-        this.currentLevel = 1;
-        this.paroli = false;
-        this.consecutiveLosses = 0;
+        this.resetBetting();
+    }
+
+    removeLastResult() {
+        if (this.results.length === 0) {
+            throw new Error('Aucun résultat à supprimer');
+        }
+
+        // Supprimer le dernier résultat des deux tableaux
+        this.results.pop();
+        this.allResults.pop();
+
+        // Réinitialiser si plus de résultats
+        if (this.results.length === 0) {
+            this.resetBetting();
+            return {
+                message: "Historique vide",
+                redCount: 0,
+                blackCount: 0,
+                total: 0,
+                patternDetected: false,
+                isTracking: false,
+                currentLevel: 1,
+                paroli: false
+            };
+        }
+
+        // Restaurer l'état précédent s'il existe
+        if (this.previousState) {
+            this.isTracking = this.previousState.isTracking;
+            this.currentLevel = this.previousState.currentLevel;
+            this.betIndex = this.previousState.betIndex;
+            this.paroli = this.previousState.paroli;
+            this.currentBetColor = this.previousState.currentBetColor;
+            this.paroliBet = this.previousState.paroliBet;
+        }
+
+        // Recalculer l'analyse avec la logique existante
+        return this.analyze();
     }
 }
 
