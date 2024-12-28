@@ -234,14 +234,14 @@ class RouletteAnalyzer {
         let blackCount = colors.filter(color => color === 'noir').length;
 
         // Détection initiale (6 rouges et 6 noirs)
-        const patternDetected = !this.isTracking && (redCount === blackCount && redCount === 6);
+        const patternDetected = redCount === blackCount && redCount === 6;
         
         let recommendation = null;
         let betColor = null;
         let betAmount = 0;
 
         // Après une détection, on suit la stratégie
-        if (patternDetected) {
+        if (patternDetected && !this.isTracking) {
             this.lastDetection = true;
             this.isTracking = true;
             recommendation = "Pattern détecté! Commencez à suivre les résultats.";
