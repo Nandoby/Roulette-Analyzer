@@ -1,29 +1,30 @@
-class RouletteAnalyzer {
+class ParityAnalyzer {
     constructor() {
-        this.results = [];
-        this.redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        this.results = []
+        this.evenNumbers = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 34, 36];
+        this.oddNumbers = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35];
+        this.numberParity = {};
+        this.evenNumbers.forEach(num => this.numberParity[num] = 'pair');
+        this.oddNumbers.forEach(num => this.numberParity[num] = 'impair');
+        this.numberParity[0] = 'vert';
+
         this.numberColors = {};
-        this.redNumbers.forEach(num => this.numberColors[num] = 'rouge');
+        const redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+        redNumbers.forEach(num => this.numberColors[num] = 'rouge');
         for (let i = 1; i <= 36; i++) {
-            if (!this.redNumbers.includes(i)) {
+            if (!redNumbers.includes(i)) {
                 this.numberColors[i] = 'noir';
             }
         }
         this.numberColors[0] = 'vert';
-
-        // Ajout de l'initialisation de numberParity
-        this.numberParity = {};
-        for (let i = 0; i <= 36; i++) {
-            if (i === 0) {
-                this.numberParity[i] = 'vert';
-            } else {
-                this.numberParity[i] = i % 2 === 0 ? 'pair' : 'impair';
-            }
-        }
-        this.baseBet = 1.00;  // Mise de base par défaut
-        this.level1Multipliers = [1, 2, 4, 8];  // Multiplicateurs pour le niveau 1
-        this.level2Multipliers = [5, 7, 9, 12, 16, 22, 29, 39, 52];  // Multiplicateurs pour le niveau 2
+        
+        this.evenCount = 0;
+        this.oddCount = 0;
+        this.baseBet = 1.00;
+        this.levelMultipliers = [1, 2, 4, 8];
+        this.level2Multipliers = [5, 7, 9, 12, 16, 22, 29, 39, 52];
         this.resetBetting();
+        this.getAdjustedMaxResults = this.getAdjustedMaxResults.bind(this);
     }
 
     setBaseBet(amount) {
@@ -31,24 +32,17 @@ class RouletteAnalyzer {
     }
 
     resetBetting() {
-        this.allResults = []; // Nouveau tableau pour tous les résultats, y compris les 0
-        this.redCount = 0;
-        this.blackCount = 0;
+        this.allResults = [];
+        this.evenCount = 0;
+        this.oddCount = 0;
         this.currentLevel = 1;
         this.betIndex = 0;
-        this.currentBetColor = null;
+        this.currentBetParity = null;
         this.paroli = false;
         this.paroliBet = 0;
-        this.baseMaxResults = 12; // Nombre de base de résultats hors 0
+        this.baseMaxResults = 12;
         this.isTracking = false;
         this.previousState = null;
-    }
-
-    getAdjustedMaxResults() {
-        // Compte le nombre de 0 dans les derniers résultats
-        const zeroCount = this.results.filter(num => num === 0).length;
-        // Ajuste le maxResults en fonction du nombre de 0
-        return this.baseMaxResults + zeroCount;
     }
 
     addResult(number) {
@@ -56,63 +50,58 @@ class RouletteAnalyzer {
             throw new Error('Le numéro doit être entre 0 et 36');
         }
 
-        // Sauvegarder l'état avant d'ajouter le numéro
         this.previousState = {
             isTracking: this.isTracking,
             currentLevel: this.currentLevel,
             betIndex: this.betIndex,
             paroli: this.paroli,
-            currentBetColor: this.currentBetColor,
+            currentBetParity: this.currentBetParity,
             paroliBet: this.paroliBet
         };
 
-        // Ajouter le numéro aux résultats pour l'affichage
         this.allResults.push(number);
         this.results.push(number);
 
-        // Si on n'a pas encore détecté le pattern 6-6
         if (!this.isTracking) {
-            // Limiter à maxResults ajusté seulement avant la détection du pattern
             const adjustedMax = this.getAdjustedMaxResults();
             if (this.results.length > adjustedMax) {
                 this.results = this.results.slice(-adjustedMax);
             }
         }
 
-        // Si on avait un pari en cours
-        if (this.currentBetColor) {
+        if (this.currentBetParity) {
             if (number === 0) {
-                // Le 0 compte comme une perte
                 this.handleLoss();
             } else {
-                const resultColor = this.numberColors[number];
-                const won = (this.currentBetColor === 'rouge' && resultColor === 'rouge') ||
-                           (this.currentBetColor === 'noir' && resultColor === 'noir');
-                
+                const resultParity = this.numberParity[number];
+                const won = (this.currentBetParity === 'pair' && resultParity === 'pair') || (this.currentBetParity === 'impair' && resultParity === 'impair');
+
                 if (won) {
                     this.handleWin();
                 } else {
                     this.handleLoss();
                 }
             }
-            this.currentBetColor = null;
+            this.currentBetParity = null;
         }
 
         return this.analyze();
     }
 
+    getAdjustedMaxResults() {
+        const zeroCount = this.results.filter(num => num === 0).length;
+        return this.baseMaxResults + zeroCount
+    }
+
     handleWin() {
         if (this.currentLevel === 1) {
-            // Victoire au niveau 1 : on réinitialise
             this.betIndex = 0;
             this.isTracking = false;
-            // On prend les 12 derniers numéros non-verts et les 0 entre eux
             const nonGreenResults = [];
             let index = this.results.length - 1;
             let countNonGreen = 0;
             let lastNonGreenIndex = -1;
-            
-            // D'abord, trouvons l'index du 12ème numéro non-vert
+
             while (index >= 0 && countNonGreen < 12) {
                 if (this.results[index] !== 0) {
                     countNonGreen++;
@@ -123,27 +112,22 @@ class RouletteAnalyzer {
                 index--;
             }
 
-            // Si on a trouvé 12 numéros non-verts, prenons tous les numéros depuis cet index
             if (lastNonGreenIndex !== -1) {
                 this.results = this.results.slice(lastNonGreenIndex);
             }
         } else if (this.currentLevel === 2) {
             if (!this.paroli) {
-                // Premier gain au niveau 2 : on active le Paroli (on continue)
                 this.paroli = true;
                 let currentBet = this.level2Multipliers[this.betIndex] * this.baseBet;
-                this.paroliBet = currentBet * 2;  // Double la mise pour le prochain coup
+                this.paroliBet = currentBet * 2;
             } else {
-                // Victoire avec le Paroli doublé : on réinitialise tout
-                // On prend les 12 derniers numéros non-verts et les 0 entre eux
                 const nonGreenResults = [];
                 let index = this.results.length - 1;
                 let countNonGreen = 0;
                 let lastNonGreenIndex = -1;
-                
-                // D'abord, trouvons l'index du 12ème numéro non-vert
+
                 while (index >= 0 && countNonGreen < 12) {
-                    if (this.numberColors[this.results[index]] === 'vert') {
+                    if (this.numberParity[this.results[index]] === 'vert') {
                         nonGreenResults.unshift(this.results[index]);
                     } else {
                         nonGreenResults.unshift(this.results[index]);
@@ -155,7 +139,6 @@ class RouletteAnalyzer {
                     index--;
                 }
 
-                // Si on a trouvé 12 numéros non-verts, prenons tous les numéros depuis cet index
                 if (lastNonGreenIndex !== -1) {
                     const lastResults = this.results.slice(lastNonGreenIndex);
                     this.resetBetting();
@@ -168,22 +151,19 @@ class RouletteAnalyzer {
     handleLoss() {
         if (this.currentLevel === 1) {
             this.betIndex++;
-            if (this.betIndex >= this.level1Multipliers.length) {
-                // Si on a perdu toutes les mises du niveau 1, on passe au niveau 2
+            if (this.betIndex >= this.levelMultipliers.length) {
                 this.currentLevel = 2;
                 this.betIndex = 0;
                 this.paroli = false;
             }
         } else if (this.currentLevel === 2) {
             if (this.paroli) {
-                // Si on perd pendant un paroli, on passe à la mise suivante
                 this.betIndex++;
                 this.paroli = false;
             } else {
                 this.betIndex++;
             }
             
-            // Si on a épuisé toutes les mises du niveau 2, on recommence au début
             if (this.betIndex >= this.level2Multipliers.length) {
                 this.resetBetting();
             }
@@ -195,43 +175,28 @@ class RouletteAnalyzer {
             number,
             color: this.numberColors[number],
             parity: this.numberParity[number]
-        }));
+        }))
     }
 
     getCurrentBet() {
         if (this.currentLevel === 1) {
-            return this.level1Multipliers[this.betIndex] * this.baseBet;
+            return this.levelMultipliers[this.betIndex] * this.baseBet;
         } else {
             if (this.paroli) {
-                return this.paroliBet;  // Le paroliBet est déjà calculé avec la mise de base
+                return this.paroliBet;
             }
             return this.level2Multipliers[this.betIndex] * this.baseBet;
         }
-    }
-
-    calculateBet() {
-        let amount;
-        if (this.currentLevel === 1) {
-            amount = this.level1Multipliers[this.betIndex] * this.baseBet;
-        } else {
-            if (this.paroli) {
-                amount = this.paroliBet;
-            } else {
-                amount = this.level2Multipliers[this.betIndex] * this.baseBet;
-            }
-        }
-        return Number(amount).toFixed(2);
     }
 
     analyze() {
         let nonGreenResults = [];
         let tempResults = [...this.results];
         let index = tempResults.length - 1;
-        
-        // On prend les 12 derniers résultats non-verts, plus les 0 qui sont entre eux
+
         let countNonGreen = 0;
         while (index >= 0 && countNonGreen < 12) {
-            if (this.numberColors[tempResults[index]] === 'vert') {
+            if (this.numberParity[tempResults[index]] === 'vert') {
                 nonGreenResults.unshift(tempResults[index]);
             } else {
                 nonGreenResults.unshift(tempResults[index]);
@@ -240,70 +205,66 @@ class RouletteAnalyzer {
             index--;
         }
 
-        const colors = nonGreenResults.map(num => this.numberColors[num]);
-        let redCount = colors.filter(color => color === 'rouge').length;
-        let blackCount = colors.filter(color => color === 'noir').length;
+        const parities = nonGreenResults.map(num => this.numberParity[num]);
+        let evenCount = parities.filter(parity => parity === 'pair').length;
+        let oddCount = parities.filter(parity => parity === 'impair').length;
 
-        // Détection initiale (6 rouges et 6 noirs)
-        const patternDetected = redCount === blackCount && redCount === 6;
-        
+        const patternDetected = evenCount === oddCount && evenCount === 6;
+
         let recommendation = null;
-        let betColor = null;
+        let betParity = null;
         let betAmount = 0;
 
-        // Après une détection, on suit la stratégie
         if (patternDetected && !this.isTracking) {
             this.lastDetection = true;
             this.isTracking = true;
-            recommendation = "Pattern détecté! Commencez à suivre les résultats.";
-        } 
+            recommendation = "Pattern détecté! Commencez à suivre les résultats";
+        }
         else if (this.isTracking) {
-            // On prend les résultats après la détection du pattern
             let postDetectionResults = [];
             let i = tempResults.length - 1;
             while (i >= 0) {
-                if (this.numberColors[tempResults[i]] !== 'vert') {
-                    postDetectionResults.unshift(tempResults[i]);
+                if (this.numberParity[tempResults[i]] !== 'vert') {
+                    postDetectionResults.unshift(tempResults[i])
                 }
                 i--;
             }
-            
-            const postColors = postDetectionResults.map(num => this.numberColors[num]);
-            const postRedCount = postColors.filter(color => color === 'rouge').length;
-            const postBlackCount = postColors.filter(color => color === 'noir').length;
-            
-            const difference = Math.abs(postRedCount - postBlackCount);
-            
+
+            const postParities = postDetectionResults.map(num => this.numberParity[num]);
+            const postEvenCount = postParities.filter(parity => parity === 'pair').length;
+            const postOddCount = postParities.filter(parity => parity === 'impair').length;
+
+            const difference = Math.abs(postEvenCount - postOddCount);
+
             if (difference >= 1) {
-                betColor = postRedCount > postBlackCount ? 'rouge' : 'noir';
+                betParity = postEvenCount > postOddCount ? 'pair' : 'impair';
                 betAmount = this.getCurrentBet();
-                this.currentBetColor = betColor;
-                
+                this.currentBetParity = betParity;
+
                 let levelInfo = this.currentLevel === 1 ? "Niveau 1" : "Niveau 2";
                 if (this.currentLevel === 2 && this.paroli) {
                     levelInfo += " (Paroli)";
                 }
-                
-                recommendation = `${levelInfo} - Misez ${betAmount.toFixed(2)} € sur ${betColor}`;
+
+                recommendation = `${levelInfo} - Misez ${betAmount.toFixed(2)} € sur ${betParity}`;
             } else {
-                recommendation = "Égalité atteinte. Attendez un nouveau déséquilibre.";
+                recommendation = "Egalité atteinte. Attendez un nouveau déséquilibre";
             }
-            
-            // Mettre à jour les compteurs pour l'affichage
-            redCount = postRedCount;
-            blackCount = postBlackCount;
+
+            evenCount = postEvenCount;
+            oddCount = postOddCount;
         } else {
             recommendation = "En attente de pattern (6-6)";
         }
 
         return {
             patternDetected,
-            redCount,
-            blackCount,
+            evenCount,
+            oddCount,
             total: nonGreenResults.length,
             recommendation,
-            betColor,
-            message: this.generateMessage(patternDetected, redCount, blackCount, recommendation),
+            betParity,
+            message: this.generateMessage(patternDetected, evenCount, oddCount, recommendation),
             betAmount,
             isTracking: this.isTracking,
             currentLevel: this.currentLevel,
@@ -311,15 +272,15 @@ class RouletteAnalyzer {
         };
     }
 
-    generateMessage(patternDetected, redCount, blackCount, recommendation) {
+    generateMessage(patternDetected, evenCount, oddCount, recommendation) {
         if (patternDetected && !this.isTracking) {
-            return `Pattern détecté! 6 rouges et 6 noirs - Système activé!`;
+            return `Pattern détecté! 6 pairs et 6 impairs - Système activé !`;
         } else if (recommendation) {
-            return `${redCount} rouges et ${blackCount} noirs - ${recommendation}`;
+            return `${evenCount} pairs et ${oddCount} impairs - ${recommendation}`;
         } else if (this.isTracking) {
-            return `${redCount} rouges et ${blackCount} noirs - En attente d'un déséquilibre`;
+            return `${evenCount} pairs et ${oddCount} impairs - En attente d'un déséquilibre`;
         } else {
-            return `${redCount} rouges et ${blackCount} noirs - En attente de pattern (6-6)`;
+            return `${evenCount} pairs et ${oddCount} impairs - En attente de pattern (6-6)`
         }
     }
 
@@ -333,17 +294,15 @@ class RouletteAnalyzer {
             throw new Error('Aucun résultat à supprimer');
         }
 
-        // Supprimer le dernier résultat des deux tableaux
         this.results.pop();
         this.allResults.pop();
 
-        // Réinitialiser si plus de résultats
         if (this.results.length === 0) {
             this.resetBetting();
             return {
                 message: "Historique vide",
-                redCount: 0,
-                blackCount: 0,
+                evenCount: 0,
+                oddCount: 0,
                 total: 0,
                 patternDetected: false,
                 isTracking: false,
@@ -352,22 +311,15 @@ class RouletteAnalyzer {
             };
         }
 
-        // Restaurer l'état précédent s'il existe
         if (this.previousState) {
             this.isTracking = this.previousState.isTracking;
             this.currentLevel = this.previousState.currentLevel;
             this.betIndex = this.previousState.betIndex;
             this.paroli = this.previousState.paroli;
-            this.currentBetColor = this.previousState.currentBetColor;
+            this.currentBetParity = this.previousState.currentBetParity;
             this.paroliBet = this.previousState.paroliBet;
         }
 
-        // Recalculer l'analyse avec la logique existante
         return this.analyze();
     }
-}
-
-// Export for Node.js testing
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RouletteAnalyzer;
 }

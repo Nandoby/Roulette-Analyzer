@@ -86,7 +86,14 @@
         background-color: #198754;
       }
 
-      /* Styles pour le texte dans le message */
+      .number-cell.pair {
+        border: 2px solid #007bff;
+      }
+
+      .number-cell.impair {
+        border: 2px solid #6c757d;
+      }
+
       #alertMessage .rouge {
         color: #dc3545;
         font-weight: bold;
@@ -358,10 +365,27 @@
                     </span>
                   </p>
                 </div>
+                <div class="col">
+                  <p class="mb-2">
+                    <span class="badge bg-primary">
+                      <i class="fas fa-circle"></i>
+                      Pairs: <span id="evenCount">0</span>
+                    </span>
+                  </p>
+                  <p class="mb-2">
+                    <span class="badge bg-secondary">
+                      <i class="fas fa-circle"></i>
+                      Impairs: <span id="oddCount">0</span>
+                    </span>
+                  </p>
+                </div>
               </div>
               <div class="row mt-3">
                 <div class="col">
                   <canvas id="statsChart" height="150"></canvas>
+                </div>
+                <div class="col">
+                  <canvas id="statsChartParity" height="150"></canvas>
                 </div>
               </div>
             </div>
@@ -374,8 +398,9 @@
     <div id="alertArea" class="message-container" style="display: none">
       <div id="alertMessage" class="text-center" role="alert"></div>
     </div>
-
+    
     <script src="roulette.js"></script>
+    <script src="parity.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
