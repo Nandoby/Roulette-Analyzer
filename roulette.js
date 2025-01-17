@@ -312,15 +312,19 @@ class RouletteAnalyzer {
     }
 
     generateMessage(patternDetected, redCount, blackCount, recommendation) {
+        let message = `${redCount} rouges et ${blackCount} noirs - `;
+
         if (patternDetected && !this.isTracking) {
-            return `Pattern détecté! 6 rouges et 6 noirs - Système activé!`;
+            message += "Pattern détecté ! - Système activé !";
         } else if (recommendation) {
-            return `${redCount} rouges et ${blackCount} noirs - ${recommendation}`;
+            message += recommendation.replace(/(\d+\.\d+) €/g, '<strong>$1 €</strong>');
         } else if (this.isTracking) {
-            return `${redCount} rouges et ${blackCount} noirs - En attente d'un déséquilibre`;
+            message += "En attente d'un déséquilibre"
         } else {
-            return `${redCount} rouges et ${blackCount} noirs - En attente de pattern (6-6)`;
+            message += "En attente de pattern (6-6)"
         }
+
+        return message
     }
 
     clearResults() {

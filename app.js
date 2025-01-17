@@ -167,6 +167,11 @@ document.addEventListener("DOMContentLoaded", () => {
     return amount.toFixed(2) + " €";
   }
 
+  function wrapColorWords(message, color, className) {
+    const regex = new RegExp(`\\b${color}\\b`, 'g');
+    return message.replace(regex, `<span class="bet-color ${className}">${color}</span>`)
+  }
+
   function updateDisplay(
     colorResults,
     colorAnalysis,
@@ -196,6 +201,8 @@ document.addEventListener("DOMContentLoaded", () => {
     updateChart(colorAnalysis.redCount, colorAnalysis.blackCount);
     updateChartParity(parityAnalysis.evenCount, parityAnalysis.oddCount);
 
+    
+
     alertArea.style.display = "block";
 
     if (colorAnalysis.recommendation && colorAnalysis.betAmount > 0) {
@@ -220,8 +227,16 @@ document.addEventListener("DOMContentLoaded", () => {
       alertMessage.className = "alert alert-info";
     }
 
-    alertMessage.innerHTML =
-      colorAnalysis.message + "<br>" + parityAnalysis.message;
+    // Wrap color words in messages
+    let colorMessage = colorAnalysis.message;
+    colorMessage = wrapColorWords(colorMessage, 'rouge', 'rouge');
+    colorMessage = wrapColorWords(colorMessage, 'noir', 'noir');
+
+    let parityMessage = parityAnalysis.message;
+    parityMessage = wrapColorWords(parityMessage, 'pair', 'pair');
+    parityMessage = wrapColorWords(parityMessage, 'impair', 'impair');
+
+    alertMessage.innerHTML = colorMessage + "<br>" + parityMessage
     undoButton.disabled = colorResults.length === 0;
   }
 

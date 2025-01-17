@@ -273,15 +273,19 @@ class ParityAnalyzer {
     }
 
     generateMessage(patternDetected, evenCount, oddCount, recommendation) {
+        let message = `${evenCount} pairs et ${oddCount} impairs - `;
+
         if (patternDetected && !this.isTracking) {
-            return `Pattern détecté! 6 pairs et 6 impairs - Système activé !`;
+            message += "Pattern détecté ! - Système activé !";
         } else if (recommendation) {
-            return `${evenCount} pairs et ${oddCount} impairs - ${recommendation}`;
+            message += recommendation.replace(/(\d+\.\d+) €/g, '<strong>$1 €</strong>');
         } else if (this.isTracking) {
-            return `${evenCount} pairs et ${oddCount} impairs - En attente d'un déséquilibre`;
+            message += "En attente d'un déséquilibre"
         } else {
-            return `${evenCount} pairs et ${oddCount} impairs - En attente de pattern (6-6)`
+            message += "En attente de pattern (6-6)"
         }
+
+        return message
     }
 
     clearResults() {
