@@ -17,41 +17,47 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <nav class="navbar">
-      <div class="container-fluid">
-        <span class="navbar-brand">Roulette Analyzer</span>
-        <div class="d-flex">
-          <button class="btn btn-outline-primary" id="navResetButton">
-            <i class="fas fa-redo-alt"></i>
-            <span class="d-none d-sm-inline">Réinitialiser</span>
-          </button>
-          <button class="btn btn-outline-primary" onclick="toggleTheme()">
-            <i class="fas fa-moon"></i>
-            <span class="d-none d-sm-inline">Thème</span>
-          </button>
-          <button
-            class="btn btn-outline-primary"
-            data-bs-toggle="modal"
-            data-bs-target="#helpModal"
-          >
-            <i class="fas fa-question-circle"></i>
-            <span class="d-none d-sm-inline">Aide</span>
-          </button>
+    <!-- Bouton pour ouvrir le modal de navigation -->
+    <button class="btn btn-primary nav-toggle-btn" data-bs-toggle="modal" data-bs-target="#navModal">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Modal de navigation -->
+    <div class="modal fade" id="navModal" tabindex="-1" aria-labelledby="navModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="navModalLabel">Navigation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <!-- Contenu de la navigation -->
+            <div class="d-flex flex-column gap-2">
+              <button class="btn btn-outline-primary" id="navResetButton">
+                <i class="fas fa-redo-alt"></i>
+                <span class="d-none d-sm-inline">Réinitialiser</span>
+              </button>
+              <button class="btn btn-outline-primary" onclick="toggleTheme()">
+                <i class="fas fa-moon"></i>
+                <span class="d-none d-sm-inline">Thème</span>
+              </button>
+              <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#helpModal">
+                <i class="fas fa-question-circle"></i>
+                <span class="d-none d-sm-inline">Aide</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </nav>
+    </div>
 
-    <!-- Modal d'aide -->
+    <!-- Modal d'aide (existant) -->
     <div class="modal fade" id="helpModal" tabindex="-1">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title">Aide</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <h6>Comment utiliser l'application :</h6>
@@ -70,7 +76,8 @@
       </div>
     </div>
 
-    <div class="container mt-5 main-content">
+    <!-- Contenu principal -->
+    <div class="container mt-2 main-content">
       <h1 class="text-center mb-4">Analyseur de Roulette</h1>
 
       <!-- Configuration de la mise de base -->
@@ -180,7 +187,7 @@
     </div>
 
     <!-- Message flottant -->
-    <div id="alertArea" class="message-container" style="display: none">
+    <div id="alertArea" class="message-container mt-0 p-0" style="display: none">
       <div id="alertMessage" class="text-center" role="alert"></div>
     </div>
     

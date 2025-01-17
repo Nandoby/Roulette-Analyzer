@@ -12,21 +12,21 @@
 }
 
 body {
-  padding: 20px;
-  transition: background-color 0.3s ease;
+  padding: 10px;
 }
 
 .container {
   max-width: 800px;
+  padding: 10px;
 }
 
 #resultsDisplay {
-  font-size: 1.5em;
-  margin-bottom: 20px;
+  font-size: 1.2em;
+  margin-bottom: 10px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
-  gap: 5px;
-  padding: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+  gap: 3px;
+  padding: 5px;
 }
 
 .message-container {
@@ -44,18 +44,21 @@ body {
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
-  width: 100%;
-  min-width: 30px;
-  max-width: 35px;
-  margin: 0;
-  font-size: 0.7em;
+  /* width: 100%; */
+  /* min-width: 30px; */
+  /* max-width: 35px; */
+  /* margin: 0; */
+  /* font-size: 0.7em; */
   border-radius: 50%;
   color: white;
+  font-size: 0.7em;
+  min-width: 25px;
+  max-width: 30px;
 }
 
 /* Animations pour les cellules */
 .number-cell.new-cell {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.3s ease-out;
 }
 
 /* Styles pour les numéros dans resultsDisplay */
@@ -85,6 +88,18 @@ body {
 #alertMessage .noir {
   color: #212529;
   font-weight: bold;
+}
+
+.card-sm {
+  padding: 10px;
+}
+
+.card-sm .card-body {
+  padding: 10px;
+}
+
+canvas {
+  height: 100px !important;
 }
 
 [data-bs-theme="dark"] #alertMessage .noir {
@@ -154,14 +169,21 @@ body {
   font-size: 1.1em;
 }
 
+.btn.fixed-top {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1000;
+}
+
 /* Transitions pour les boutons */
 .btn {
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
 .btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Media queries pour différentes tailles d'écran */
@@ -211,4 +233,24 @@ body {
 .badge {
   font-size: 0.9em;
   padding: 8px 12px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #0056b3;
+}
+
+.btn-warning {
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  border-color: #e0a800;
 }
